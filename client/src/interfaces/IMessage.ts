@@ -1,4 +1,10 @@
+export enum MessageType {
+  SUCCESS = 'success',
+  WARNING = 'warning',
+  ERROR = 'error'
+}
+
 export interface IMessage {
-    type: string,
-    text: string
+  type: MessageType
+  text: string
 }
