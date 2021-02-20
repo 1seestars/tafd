@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { flights } from '../flights.json'
 import Button from '@material-ui/core/Button'
 import { black, green, orange, white } from '../utils/styles/theme'
-import { IFlight } from '../interfaces/IFlight'
+import { IFlight, Status } from '../interfaces/IFlight'
 
 const FlightList = styled.ul`
   margin: 0;
@@ -51,9 +51,15 @@ const Destination = styled(TimeBlock)`
   margin-bottom: 10px;
 `
 
+interface IFlightStatusProps {
+  status?: Status
+}
+
 const FlightStatus = styled.span`
-  background: ${({ status }) => (status === 'DELAYED' ? orange : green)};
-  color: ${({ status }) => (status === 'DELAYED' ? white : black)};
+  background: ${({ status }: IFlightStatusProps) =>
+    status === 'DELAYED' ? orange : green};
+  color: ${({ status }: IFlightStatusProps) =>
+    status === 'DELAYED' ? white : black};
   padding: 4px 7px;
   border-radius: 4px;
   font-weight: 600;
@@ -64,7 +70,7 @@ const Terminal = styled.div`
 `
 
 interface IFlightDetailsContainerProps {
-  handleClickOpen: (flight: IFlight) => void
+  handleClickOpen: (flight?: IFlight) => void
 }
 
 const FlightDetailsContainer: React.FC<IFlightDetailsContainerProps> = ({

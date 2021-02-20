@@ -1,10 +1,10 @@
-enum Status {
-  ONSHEDULE = 'ON SCHEDULE',
+export enum Status {
+  ONSCHEDULE = 'ON SCHEDULE',
   LANDED = 'LANDED',
   DELAYED = 'DELAYED'
 }
 
-enum Terminal {
+export enum Terminal {
   T1 = 'T1',
   T2 = 'T2',
   T3 = 'T3'
