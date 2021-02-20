@@ -16,11 +16,11 @@ const PlanFlightButtonContainer = styled.div`
 `
 
 const Alert = (props: any) => {
-  console.log(props)
   return <MuiAlert elevation={6} variant="filled" {...props} />
 }
 
 const App: React.FC = () => {
+  const [flights, setFlights] = useState<Array<IFlight>>([])
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [flightInfo, setFlightInfo] = useState<IFlight | null>(null)
   const [message, setMessage] = useState<IMessage>({
@@ -40,9 +40,13 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <FlightDetailsContainer handleClickOpen={handleClickOpen} />
+      <FlightDetailsContainer
+        flights={flights}
+        handleClickOpen={handleClickOpen}
+      />
       <PlanFlightButtonContainer>
         <ModalWindow
+          setFlights={setFlights}
           setMessage={setMessage}
           flightInfo={flightInfo}
           open={openModal}

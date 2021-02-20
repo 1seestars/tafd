@@ -1,9 +1,14 @@
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import React, {
+  ChangeEvent,
+  FormEvent,
+  SetStateAction,
+  useEffect,
+  useState
+} from 'react'
 import Button from '@material-ui/core/Button'
 import Dialog from '@material-ui/core/Dialog'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogActions from '@material-ui/core/DialogActions'
-import Slide from '@material-ui/core/Slide'
 import TextField from '@material-ui/core/TextField'
 import styled from 'styled-components'
 import CircularProgress from '@material-ui/core/CircularProgress'
@@ -13,6 +18,7 @@ import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import { IFlight, Status, Terminal } from '../interfaces/IFlight'
 import { IMessage, MessageType } from '../interfaces/IMessage'
+import { apiCall } from '../utils/api/backendApi'
 
 // const Transition = React.forwardRef(function Transition(props, ref) {
 //   return <Slide direction="up" ref={ref} {...props} />
@@ -49,8 +55,8 @@ const defaultInputState = {
   sourcePortCode: '',
   destinationPortName: '',
   destinationPortCode: '',
-  scheduledArrival: '07:30',
-  scheduledDeparture: '08:30',
+  scheduledArrival: new Date('2017-10-02'),
+  scheduledDeparture: new Date(),
   status: Status.ONSCHEDULE,
   terminal: Terminal.T1
 }
@@ -61,9 +67,11 @@ interface IModalWindowProps {
   open: boolean
   handleClickOpen: () => void
   handleClickClose: () => void
+  setFlights: (state: SetStateAction<Array<IFlight>>) => void
 }
 
 const ModalWindow: React.FC<IModalWindowProps> = ({
+  setFlights,
   setMessage,
   flightInfo,
   open,
@@ -84,7 +92,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
   ) => {
     setInputState((state) => ({
       ...state,
-      [e.target.name]: e.target.value
+      [e.currentTarget.name]: e.currentTarget.value
     }))
   }
 
@@ -94,31 +102,37 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
   }
 
   const addNewFlight = async (inputState: IFlight) => {
-    //const res = apiCall('create', 'POST', inputState)
-    //console.log(res)
-    // setTimeout(() => {
-    //   console.log(inputState)
-    //   setLoading(false)
-    //   handleClickClose()
-    //   setInputState(defaultInputState)
-    //   setMessage({
-    //     type: 'success',
-    //     text: 'Flight was created successfully!'
-    //   })
-    // }, 2000)
+    const newState = {
+      ...inputState,
+      scheduledArrival: new Date('2017-10-02'),
+      scheduledDeparture: new Date('2017-10-02')
+    }
+    try {
+      const newFlight = await apiCall('', 'POST', newState)
 
-    setTimeout(() => {
-      console.log(inputState)
-      setLoading(false)
+      setFlights((state) => {
+        return [...state, newFlight]
+      })
+
+      handleClickClose()
+      setInputState(defaultInputState)
+      setMessage({
+        type: MessageType.SUCCESS,
+        text: 'Flight was created successfully!'
+      })
+    } catch (e) {
+      console.log(e)
       setMessage({
         type: MessageType.ERROR,
         text: 'Something went wrong!'
       })
-    }, 2000)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const editFlight = (inputState: IFlight) => {
-    const route = `edit/${inputState.id}`
+    const route = `edit/${inputState._id}`
     //const res = apiCall(route, 'PATCH', inputState.status)
 
     //console.log(res)

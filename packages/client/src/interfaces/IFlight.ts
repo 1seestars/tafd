@@ -11,15 +11,15 @@ export enum Terminal {
 }
 
 export interface IFlight {
-  id?: string
+  _id?: string
   flightCode: string
   flightProvider: string
   sourcePortName: string
   sourcePortCode: string
   destinationPortName: string
   destinationPortCode: string
-  scheduledArrival: string
-  scheduledDeparture: string
+  scheduledArrival: Date
+  scheduledDeparture: Date
   status: Status
   terminal: Terminal
 }

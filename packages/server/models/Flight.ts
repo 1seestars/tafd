@@ -1,6 +1,18 @@
 import { IsString, IsDateString, validateOrReject } from 'class-validator'
 import { getDb } from '../dbConfig'
 
+export enum Status {
+  ONSCHEDULE = 'ON SCHEDULE',
+  LANDED = 'LANDED',
+  DELAYED = 'DELAYED'
+}
+
+export enum Terminal {
+  T1 = 'T1',
+  T2 = 'T2',
+  T3 = 'T3'
+}
+
 interface IFlight {
   flightCode: string
   flightProvider: string
@@ -10,8 +22,8 @@ interface IFlight {
   destinationPortCode: string
   scheduledArrival: Date
   scheduledDeparture: Date
-  status: string
-  terminal: string
+  status: Status
+  terminal: Terminal
 }
 
 interface IFlightDb extends IFlight {
@@ -44,10 +56,10 @@ class Flight implements IFlight {
   scheduledDeparture: Date
 
   @IsString()
-  terminal: string
+  status: Status
 
   @IsString()
-  status: string
+  terminal: Terminal
 
   static async create(params: IFlight): Promise<IFlightDb> {
     const {
@@ -81,6 +93,12 @@ class Flight implements IFlight {
     const { ops } = await getDb().collection('flights').insertOne(newFlight)
 
     return ops[0]
+  }
+
+  static async get(): Promise<any> {
+    const res = await getDb().collection('flights').findOne({})
+    console.log(res)
+    return res
   }
 }
 

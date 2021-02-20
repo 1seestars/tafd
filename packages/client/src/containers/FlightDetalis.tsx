@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import { flights } from '../flights.json'
 import Button from '@material-ui/core/Button'
 import { black, green, orange, white } from '../utils/styles/theme'
 import { IFlight, Status } from '../interfaces/IFlight'
@@ -70,16 +69,18 @@ const Terminal = styled.div`
 `
 
 interface IFlightDetailsContainerProps {
+  flights: Array<IFlight>
   handleClickOpen: (flight?: IFlight) => void
 }
 
 const FlightDetailsContainer: React.FC<IFlightDetailsContainerProps> = ({
+  flights,
   handleClickOpen
 }) => (
   <FlightList>
     {flights &&
       (flights as Array<IFlight>).map((flight: IFlight) => (
-        <Container key={flight.id}>
+        <Container key={flight._id}>
           <FlexBlock>
             <TimeBlock>
               <span>{flight.scheduledDeparture}</span>

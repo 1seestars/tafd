@@ -27,6 +27,8 @@ const handlerWrapper = (fn: RequestHandler) => (
 flightRouter.get(
   '/',
   handlerWrapper(async (req, res, next) => {
+    await Flight.get()
+
     return res.send({
       text: 'Hello world!'
     })
