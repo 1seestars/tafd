@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import Button from '@material-ui/core/Button'
 import Dialog from '@material-ui/core/Dialog'
 import DialogContent from '@material-ui/core/DialogContent'
@@ -14,9 +14,9 @@ import Select from '@material-ui/core/Select'
 import { IFlight, Status, Terminal } from '../interfaces/IFlight'
 import { IMessage, MessageType } from '../interfaces/IMessage'
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />
-})
+// const Transition = React.forwardRef(function Transition(props, ref) {
+//   return <Slide direction="up" ref={ref} {...props} />
+// })
 
 const InputsWrapper = styled.div`
   margin: 10px 20px;
@@ -77,7 +77,11 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
     if (flightInfo) setInputState(flightInfo)
   }, [flightInfo])
 
-  const onHandleChange = (e) => {
+  const onHandleChange = (
+    e:
+      | ChangeEvent<HTMLInputElement>
+      | ChangeEvent<{ name?: any; value: unknown }>
+  ) => {
     setInputState((state) => ({
       ...state,
       [e.target.name]: e.target.value
@@ -113,7 +117,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
     }, 2000)
   }
 
-  const editFlight = (inputState) => {
+  const editFlight = (inputState: IFlight) => {
     const route = `edit/${inputState.id}`
     //const res = apiCall(route, 'PATCH', inputState.status)
 
@@ -134,7 +138,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
       </Button>
       <Dialog
         open={open}
-        TransitionComponent={Transition}
+        // TransitionComponent={Transition}
         keepMounted
         onClose={handleCancel}
         aria-labelledby="alert-dialog-slide-title"

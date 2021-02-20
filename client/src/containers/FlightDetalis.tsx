@@ -57,9 +57,9 @@ interface IFlightStatusProps {
 
 const FlightStatus = styled.span`
   background: ${({ status }: IFlightStatusProps) =>
-    status === 'DELAYED' ? orange : green};
+    status === Status.DELAYED ? orange : green};
   color: ${({ status }: IFlightStatusProps) =>
-    status === 'DELAYED' ? white : black};
+    status === Status.DELAYED ? black : white};
   padding: 4px 7px;
   border-radius: 4px;
   font-weight: 600;
@@ -78,7 +78,7 @@ const FlightDetailsContainer: React.FC<IFlightDetailsContainerProps> = ({
 }) => (
   <FlightList>
     {flights &&
-      flights.map((flight) => (
+      (flights as Array<IFlight>).map((flight: IFlight) => (
         <Container key={flight.id}>
           <FlexBlock>
             <TimeBlock>
