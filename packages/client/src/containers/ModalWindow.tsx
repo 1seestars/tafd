@@ -1,6 +1,9 @@
 import React, {
   ChangeEvent,
   FormEvent,
+  ForwardRefRenderFunction,
+  ReactElement,
+  ReactNode,
   SetStateAction,
   useEffect,
   useState
@@ -16,13 +19,12 @@ import InputLabel from '@material-ui/core/InputLabel'
 import MenuItem from '@material-ui/core/MenuItem'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
-import { IFlight, Status, Terminal } from '../interfaces/IFlight'
+import { IFlight, Status } from '../interfaces/IFlight'
 import { IMessage, MessageType } from '../interfaces/IMessage'
 import { apiCall } from '../utils/api/backendApi'
-
-// const Transition = React.forwardRef(function Transition(props, ref) {
-//   return <Slide direction="up" ref={ref} {...props} />
-// })
+import timeToISO from '../utils/timeToISO'
+import timeFromISO from '../utils/timeFromISO'
+import { LoaderContainer } from './App'
 
 const InputsWrapper = styled.div`
   margin: 10px 20px;
@@ -32,14 +34,6 @@ const Input = styled(TextField)`
   && {
     margin: 10px 0 0;
   }
-`
-
-const LoaderContainer = styled.div`
-  min-width: 220px;
-  min-height: 220px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `
 
 const SelectWrapper = styled(FormControl)`
@@ -55,10 +49,10 @@ const defaultInputState = {
   sourcePortCode: '',
   destinationPortName: '',
   destinationPortCode: '',
-  scheduledArrival: new Date('2017-10-02'),
-  scheduledDeparture: new Date(),
-  status: Status.ONSCHEDULE,
-  terminal: Terminal.T1
+  scheduledArrival: '17:00',
+  scheduledDeparture: '17:30',
+  status: Status.ON_SCHEDULE,
+  terminal: 'T1'
 }
 
 interface IModalWindowProps {
@@ -92,7 +86,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
   ) => {
     setInputState((state) => ({
       ...state,
-      [e.currentTarget.name]: e.currentTarget.value
+      [e.target.name]: e.target.value
     }))
   }
 
@@ -101,11 +95,16 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
     handleClickClose()
   }
 
-  const addNewFlight = async (inputState: IFlight) => {
+  const handleDelete = () => {
+    const ans = window.confirm('Are you sure?')
+    if (ans) deleteFlight()
+  }
+
+  const addNewFlight = async () => {
     const newState = {
       ...inputState,
-      scheduledArrival: new Date('2017-10-02'),
-      scheduledDeparture: new Date('2017-10-02')
+      scheduledArrival: timeToISO(inputState.scheduledArrival.toString()),
+      scheduledDeparture: timeToISO(inputState.scheduledDeparture.toString())
     }
     try {
       const newFlight = await apiCall('', 'POST', newState)
@@ -121,7 +120,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
         text: 'Flight was created successfully!'
       })
     } catch (e) {
-      console.log(e)
+      console.error(e)
       setMessage({
         type: MessageType.ERROR,
         text: 'Something went wrong!'
@@ -131,18 +130,75 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
     }
   }
 
-  const editFlight = (inputState: IFlight) => {
-    const route = `edit/${inputState._id}`
-    //const res = apiCall(route, 'PATCH', inputState.status)
+  const deleteFlight = async (): Promise<void> => {
+    try {
+      setLoading(true)
+      await apiCall(inputState._id, 'DELETE')
 
-    //console.log(res)
-    //setLoading(false)
+      setFlights((state) => {
+        return [...state].filter(
+          (flight: IFlight) => flight._id !== inputState._id
+        )
+      })
+
+      handleClickClose()
+      setInputState(defaultInputState)
+      setMessage({
+        type: MessageType.SUCCESS,
+        text: 'Flight was removed successfully!'
+      })
+    } catch (e) {
+      console.error(e)
+      setMessage({
+        type: MessageType.ERROR,
+        text: 'Something went wrong!'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const editFlight = async () => {
+    if (flightInfo && flightInfo.status === inputState.status) {
+      handleClickClose()
+      setInputState(defaultInputState)
+      return
+    }
+
+    try {
+      setLoading(true)
+      const flight: IFlight = await apiCall(inputState._id, 'PATCH', inputState)
+
+      setFlights((state) => {
+        const copiedFlights = [...state]
+        const index = copiedFlights.findIndex((f) => f._id === flight._id)
+        const firstHalf = copiedFlights.slice(0, index)
+        const lastHalf = copiedFlights.slice(index + 1, copiedFlights.length)
+
+        return [...firstHalf, flight, ...lastHalf]
+      })
+
+      handleClickClose()
+      setInputState(defaultInputState)
+      setMessage({
+        type: MessageType.SUCCESS,
+        text: 'Status was changed successfully!'
+      })
+    } catch (e) {
+      console.error(e)
+      setMessage({
+        type: MessageType.ERROR,
+        text: 'Something went wrong!'
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
-    flightInfo ? editFlight(inputState) : addNewFlight(inputState)
+    flightInfo ? editFlight() : addNewFlight()
   }
 
   return (
@@ -152,7 +208,6 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
       </Button>
       <Dialog
         open={open}
-        // TransitionComponent={Transition}
         keepMounted
         onClose={handleCancel}
         aria-labelledby="alert-dialog-slide-title"
@@ -264,7 +319,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                   type="time"
                   value={
                     flightInfo
-                      ? flightInfo.scheduledArrival
+                      ? timeFromISO(flightInfo.scheduledArrival.toString())
                       : inputState.scheduledArrival
                   }
                   InputLabelProps={{
@@ -285,7 +340,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                   type="time"
                   value={
                     flightInfo
-                      ? flightInfo.scheduledDeparture
+                      ? timeFromISO(flightInfo.scheduledDeparture.toString())
                       : inputState.scheduledDeparture
                   }
                   InputLabelProps={{
@@ -306,8 +361,8 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                     onChange={onHandleChange}
                     label="Status"
                   >
-                    <MenuItem value={Status.ONSCHEDULE}>
-                      {Status.ONSCHEDULE}
+                    <MenuItem value={Status.ON_SCHEDULE}>
+                      {Status.ON_SCHEDULE}
                     </MenuItem>
                     <MenuItem value={Status.LANDED}>{Status.LANDED}</MenuItem>
                     <MenuItem value={Status.DELAYED}>{Status.DELAYED}</MenuItem>
@@ -329,16 +384,22 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                     onChange={onHandleChange}
                     label="Terminal"
                   >
-                    <MenuItem value={Terminal.T1}>{Terminal.T1}</MenuItem>
-                    <MenuItem value={Terminal.T2}>{Terminal.T2}</MenuItem>
-                    <MenuItem value={Terminal.T3}>{Terminal.T3}</MenuItem>
+                    <MenuItem value={'T1'}>T1</MenuItem>
+                    <MenuItem value={'T2'}>T2</MenuItem>
+                    <MenuItem value={'T3'}>T3</MenuItem>
                   </Select>
                 </SelectWrapper>
               </InputsWrapper>
               <DialogActions>
-                <Button onClick={handleCancel} color="secondary">
+                {flightInfo && (
+                  <Button onClick={handleDelete} color="secondary">
+                    Delete
+                  </Button>
+                )}
+                <Button onClick={handleCancel} color="inherit">
                   Cancel
                 </Button>
+
                 <Button type={'submit'} color="primary">
                   Save
                 </Button>

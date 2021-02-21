@@ -1,13 +1,7 @@
 export enum Status {
-  ONSCHEDULE = 'ON SCHEDULE',
+  ON_SCHEDULE = 'ON SCHEDULE',
   LANDED = 'LANDED',
   DELAYED = 'DELAYED'
-}
-
-export enum Terminal {
-  T1 = 'T1',
-  T2 = 'T2',
-  T3 = 'T3'
 }
 
 export interface IFlight {
@@ -18,8 +12,8 @@ export interface IFlight {
   sourcePortCode: string
   destinationPortName: string
   destinationPortCode: string
-  scheduledArrival: Date
-  scheduledDeparture: Date
+  scheduledArrival: Date | string
+  scheduledDeparture: Date | string
   status: Status
-  terminal: Terminal
+  terminal: string
 }

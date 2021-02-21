@@ -1,16 +1,19 @@
-import { IsString, IsDateString, validateOrReject } from 'class-validator'
+import {
+  IsString,
+  IsDateString,
+  validateOrReject,
+  IsEnum,
+  MinLength,
+  MaxLength
+} from 'class-validator'
 import { getDb } from '../dbConfig'
+import { ObjectId } from 'mongodb'
+import { DateTime } from 'luxon'
 
 export enum Status {
-  ONSCHEDULE = 'ON SCHEDULE',
+  ON_SCHEDULE = 'ON SCHEDULE',
   LANDED = 'LANDED',
   DELAYED = 'DELAYED'
-}
-
-export enum Terminal {
-  T1 = 'T1',
-  T2 = 'T2',
-  T3 = 'T3'
 }
 
 interface IFlight {
@@ -23,30 +26,47 @@ interface IFlight {
   scheduledArrival: Date
   scheduledDeparture: Date
   status: Status
-  terminal: Terminal
+  terminal: string
 }
 
 interface IFlightDb extends IFlight {
   _id: string
 }
 
+interface IConfig {
+  status: Status
+  scheduledDeparture?: Date | string
+}
+
 class Flight implements IFlight {
   @IsString()
+  @MinLength(2)
+  @MaxLength(30)
   flightCode: string
 
   @IsString()
+  @MinLength(2)
+  @MaxLength(50)
   flightProvider: string
 
   @IsString()
+  @MinLength(2)
+  @MaxLength(30)
   sourcePortName: string
 
   @IsString()
+  @MinLength(2)
+  @MaxLength(30)
   sourcePortCode: string
 
   @IsString()
+  @MinLength(2)
+  @MaxLength(30)
   destinationPortName: string
 
   @IsString()
+  @MinLength(2)
+  @MaxLength(30)
   destinationPortCode: string
 
   @IsDateString()
@@ -55,11 +75,13 @@ class Flight implements IFlight {
   @IsDateString()
   scheduledDeparture: Date
 
-  @IsString()
+  @IsEnum(Status)
   status: Status
 
   @IsString()
-  terminal: Terminal
+  @MinLength(1)
+  @MaxLength(30)
+  terminal: string
 
   static async create(params: IFlight): Promise<IFlightDb> {
     const {
@@ -95,10 +117,43 @@ class Flight implements IFlight {
     return ops[0]
   }
 
-  static async get(): Promise<any> {
-    const res = await getDb().collection('flights').findOne({})
-    console.log(res)
-    return res
+  static async get(): Promise<Array<IFlightDb>> {
+    return getDb().collection('flights').find().toArray()
+  }
+
+  static async delete(id: string): Promise<void> {
+    const { deletedCount } = await getDb()
+      .collection('flights')
+      .deleteOne({ _id: new ObjectId(id) })
+
+    if (!deletedCount) throw new Error('Item has not been deleted!')
+  }
+
+  static async edit(id: string, prevFlight: IFlightDb): Promise<IFlightDb> {
+    const config: IConfig = { status: prevFlight.status }
+    const response = {
+      ...prevFlight
+    }
+
+    if (prevFlight.status === Status.DELAYED) {
+      const addedTime = DateTime.fromISO(
+        prevFlight.scheduledDeparture.toString()
+      )
+        .plus({ minutes: 15 })
+        .toUTC()
+        .toISO()
+
+      config['scheduledDeparture'] = addedTime
+      response['scheduledDeparture'] = new Date(addedTime)
+    }
+
+    const flight = await getDb()
+      .collection('flights')
+      .findOneAndUpdate({ _id: new ObjectId(id) }, { $set: config })
+
+    if (!flight.value) throw new Error('Item was not found!')
+
+    return response
   }
 }
 

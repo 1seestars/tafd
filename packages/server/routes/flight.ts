@@ -27,11 +27,9 @@ const handlerWrapper = (fn: RequestHandler) => (
 flightRouter.get(
   '/',
   handlerWrapper(async (req, res, next) => {
-    await Flight.get()
+    const flights = await Flight.get()
 
-    return res.send({
-      text: 'Hello world!'
-    })
+    return res.send(flights)
   })
 )
 
@@ -41,6 +39,28 @@ flightRouter.post(
     const flight = await Flight.create({ ...req.body })
 
     return res.send(flight)
+  })
+)
+
+flightRouter.delete(
+  '/:id',
+  handlerWrapper(async function (req, res, next) {
+    const { id } = req.params
+
+    await Flight.delete(id)
+
+    return res.send()
+  })
+)
+
+flightRouter.patch(
+  '/:id',
+  handlerWrapper(async function (req, res, next) {
+    const { id } = req.params
+
+    const response = await Flight.edit(id, { ...req.body })
+
+    return res.send(response)
   })
 )
 

@@ -3,6 +3,8 @@ import styled from 'styled-components'
 import Button from '@material-ui/core/Button'
 import { black, green, orange, white } from '../utils/styles/theme'
 import { IFlight, Status } from '../interfaces/IFlight'
+import timeFromISO from '../utils/timeFromISO'
+import { DateTime } from 'luxon'
 
 const FlightList = styled.ul`
   margin: 0;
@@ -44,6 +46,12 @@ const FlexBlock = styled.div`
 
 const TimeBlock = styled.div`
   font-weight: 700;
+
+  & span:first-child {
+    font-size: 0.8em;
+    opacity: 0.6;
+    text-decoration: line-through;
+  }
 `
 
 const Destination = styled(TimeBlock)`
@@ -68,6 +76,20 @@ const Terminal = styled.div`
   font-weight: 500;
 `
 
+const NoFlightsBlock = styled.div`
+  background: bisque;
+  min-height: 300px;
+  border-radius: 20px;
+  padding: 10% 5%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 4vh;
+  text-shadow: 4px 4px 2px rgba(150, 150, 150, 1);
+  opacity: 0.7;
+`
+
 interface IFlightDetailsContainerProps {
   flights: Array<IFlight>
   handleClickOpen: (flight?: IFlight) => void
@@ -78,12 +100,29 @@ const FlightDetailsContainer: React.FC<IFlightDetailsContainerProps> = ({
   handleClickOpen
 }) => (
   <FlightList>
-    {flights &&
-      (flights as Array<IFlight>).map((flight: IFlight) => (
+    {!flights.length && (
+      <NoFlightsBlock>
+        Here's no planned flights! Try to add one!
+      </NoFlightsBlock>
+    )}
+    {(flights as Array<IFlight>).map((flight: IFlight) => {
+      let prevTime = ''
+
+      if (flight.status === Status.DELAYED) {
+        const minus = DateTime.fromISO(flight.scheduledDeparture.toString())
+          .minus({ minutes: 15 })
+          .toUTC()
+          .toISO()
+
+        prevTime = DateTime.fromISO(minus).toLocaleString(DateTime.TIME_SIMPLE)
+      }
+
+      return (
         <Container key={flight._id}>
           <FlexBlock>
             <TimeBlock>
-              <span>{flight.scheduledDeparture}</span>
+              <span>{prevTime}</span>
+              <span>{timeFromISO(flight.scheduledDeparture.toString())}</span>
             </TimeBlock>
           </FlexBlock>
           <FlexBlock>
@@ -109,7 +148,8 @@ const FlightDetailsContainer: React.FC<IFlightDetailsContainerProps> = ({
             </div>
           </FlexBlock>
         </Container>
-      ))}
+      )
+    })}
   </FlightList>
 )
 
