@@ -121,7 +121,7 @@ const FlightDetailsContainer: React.FC<IFlightDetailsContainerProps> = ({
         <Container key={flight._id}>
           <FlexBlock>
             <TimeBlock>
-              <span>{prevTime}</span>
+              <span>{prevTime}</span>&nbsp;
               <span>{timeFromISO(flight.scheduledDeparture.toString())}</span>
             </TimeBlock>
           </FlexBlock>
