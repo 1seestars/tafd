@@ -102,7 +102,7 @@ const FlightDetailsContainer: React.FC<IFlightDetailsContainerProps> = ({
   <FlightList>
     {!flights.length && (
       <NoFlightsBlock>
-        Here's no planned flights! Try to add one!
+        No scheduled flights found! Try to add one!
       </NoFlightsBlock>
     )}
     {(flights as Array<IFlight>).map((flight: IFlight) => {

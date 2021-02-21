@@ -3,8 +3,7 @@ import {
   IsDateString,
   validateOrReject,
   IsEnum,
-  MinLength,
-  MaxLength
+  MinLength
 } from 'class-validator'
 import { getDb } from '../dbConfig'
 import { ObjectId } from 'mongodb'
@@ -40,33 +39,27 @@ interface IConfig {
 
 class Flight implements IFlight {
   @IsString()
-  @MinLength(2)
-  @MaxLength(30)
+  @MinLength(1)
   flightCode: string
 
   @IsString()
-  @MinLength(2)
-  @MaxLength(50)
+  @MinLength(1)
   flightProvider: string
 
   @IsString()
-  @MinLength(2)
-  @MaxLength(30)
+  @MinLength(1)
   sourcePortName: string
 
   @IsString()
-  @MinLength(2)
-  @MaxLength(30)
+  @MinLength(1)
   sourcePortCode: string
 
   @IsString()
-  @MinLength(2)
-  @MaxLength(30)
+  @MinLength(1)
   destinationPortName: string
 
   @IsString()
-  @MinLength(2)
-  @MaxLength(30)
+  @MinLength(1)
   destinationPortCode: string
 
   @IsDateString()
@@ -80,7 +73,6 @@ class Flight implements IFlight {
 
   @IsString()
   @MinLength(1)
-  @MaxLength(30)
   terminal: string
 
   static async create(params: IFlight): Promise<IFlightDb> {

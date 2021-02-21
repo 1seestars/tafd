@@ -107,7 +107,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
       scheduledDeparture: timeToISO(inputState.scheduledDeparture.toString())
     }
     try {
-      const newFlight = await apiCall('', 'POST', newState)
+      const newFlight = await apiCall('flights', 'POST', newState)
 
       setFlights((state) => {
         return [...state, newFlight]
@@ -123,7 +123,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
       console.error(e)
       setMessage({
         type: MessageType.ERROR,
-        text: 'Something went wrong!'
+        text: e.message
       })
     } finally {
       setLoading(false)
@@ -132,8 +132,9 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
 
   const deleteFlight = async (): Promise<void> => {
     try {
+      const route = `flights/${inputState._id}`
       setLoading(true)
-      await apiCall(inputState._id, 'DELETE')
+      await apiCall(route, 'DELETE')
 
       setFlights((state) => {
         return [...state].filter(
@@ -151,7 +152,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
       console.error(e)
       setMessage({
         type: MessageType.ERROR,
-        text: 'Something went wrong!'
+        text: e.message
       })
     } finally {
       setLoading(false)
@@ -166,8 +167,9 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
     }
 
     try {
+      const route = `flights/${inputState._id}`
       setLoading(true)
-      const flight: IFlight = await apiCall(inputState._id, 'PATCH', inputState)
+      const flight: IFlight = await apiCall(route, 'PATCH', inputState)
 
       setFlights((state) => {
         const copiedFlights = [...state]
@@ -188,7 +190,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
       console.error(e)
       setMessage({
         type: MessageType.ERROR,
-        text: 'Something went wrong!'
+        text: e.message
       })
     } finally {
       setLoading(false)

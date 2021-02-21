@@ -1,7 +1,6 @@
 import { MongoClient } from 'mongodb'
-require('dotenv').config()
 
-const uri: string = process.env.MONGO_URI!
+const uri: string = 'mongodb://root:pass12345@mongodb:27017'
 
 export const mongoClient = new MongoClient(uri, { useUnifiedTopology: true })
 

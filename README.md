@@ -6,15 +6,9 @@ In the main directory, you can run:
 
 ### `docker-compose up`
 
-It will start container with Mongo DB
+It will start container with application
 
-### `yarn`
-
-For installing node_modules
-
-### `yarn start`
-
-Your server will start on the http://localhost:4000/ 
+Your server will start on the http://localhost:4000/
 
 After that, application will open on http://localhost:3000/
 

@@ -11,7 +11,9 @@
     "client": "yarn workspace client start",
     "server": "yarn workspace server dev",
     "start": "concurrently --kill-others-on-fail \"yarn server\"  \"yarn client\"",
-    "fix:prettier": "./node_modules/.bin/prettier --write \"**/*.ts\""
+    "fix:prettier": "./node_modules/.bin/prettier --write \"**/*.ts\"",
+    "docker:build": "docker-compose build --no-cache",
+    "docker:compose": "docker-compose up"
   },
   "devDependencies": {
     "concurrently": "^5.3.0",

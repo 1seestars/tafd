@@ -43,14 +43,14 @@ const App: React.FC = () => {
     const getFlights = async (): Promise<void> => {
       try {
         setLoading(true)
-        const flights: Array<IFlight> = await apiCall()
+        const flights: Array<IFlight> = await apiCall('flights')
 
         setFlights(flights)
       } catch (e) {
         console.error(e)
         setMessage({
           type: MessageType.ERROR,
-          text: 'Something went wrong!'
+          text: e.message
         })
       } finally {
         setLoading(false)

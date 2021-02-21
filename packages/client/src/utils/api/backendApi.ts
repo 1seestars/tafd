@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, Method, AxiosResponse } from 'axios'
 import { IFlight } from '../../interfaces/IFlight'
-const BACKEND_URL = process.env.REACT_APP_BACKEND_API
+const BACKEND_URL = 'http://localhost:4000/'
 
 export const apiCall = async (
   route: string = '',

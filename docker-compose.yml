@@ -1,6 +1,34 @@
 version: "3.3"
 
 services:
+  client:
+    build: ./packages/client
+    container_name: tafd_client
+    command: yarn start
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    depends_on:
+      - api
+    #    env_file:
+    #      - ./api/.env
+    networks:
+      - tafd_network
+
+  api:
+    build: ./packages/server
+    container_name: tafd_server
+    command: yarn start
+    restart: unless-stopped
+    ports:
+      - '4000:4000'
+    depends_on:
+      - mongodb
+    #    env_file:
+    #      - ./api/.env
+    networks:
+      - tafd_network
+
   mongodb:
     image: mongo
     container_name: mongodb_tafd
