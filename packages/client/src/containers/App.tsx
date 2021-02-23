@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import theme from '../utils/styles/theme'
 import styled from 'styled-components'
 import MuiAlert from '@material-ui/lab/Alert'
 import Snackbar from '@material-ui/core/Snackbar'
 import { ThemeProvider } from '@material-ui/styles'
 import ModalWindow from './ModalWindow'
-import FlightDetailsContainer from './FlightDetalis'
+import FlightDetailsContainer from './FlightDetails'
 import { IFlight } from '../interfaces/IFlight'
 import { IMessage, MessageType } from '../interfaces/IMessage'
 import { apiCall } from '../utils/api/backendApi'
@@ -60,15 +60,15 @@ const App: React.FC = () => {
     getFlights()
   }, [])
 
-  const handleClickOpen = (flight?: IFlight): void => {
+  const handleClickOpen = useCallback((flight?: IFlight): void => {
     if (flight) setFlightInfo(flight)
     setOpenModal(true)
-  }
+  }, [])
 
-  const handleClickClose = () => {
+  const handleClickClose = useCallback(() => {
     setOpenModal(false)
     setFlightInfo(null)
-  }
+  }, [])
 
   return (
     <ThemeProvider theme={theme}>
@@ -82,7 +82,6 @@ const App: React.FC = () => {
           handleClickOpen={handleClickOpen}
         />
       )}
-
       <PlanFlightButtonContainer>
         <ModalWindow
           setFlights={setFlights}

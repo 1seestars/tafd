@@ -1,12 +1,10 @@
 import React, {
   ChangeEvent,
   FormEvent,
-  ForwardRefRenderFunction,
-  ReactElement,
-  ReactNode,
   SetStateAction,
   useEffect,
-  useState
+  useState,
+  memo
 } from 'react'
 import Button from '@material-ui/core/Button'
 import Dialog from '@material-ui/core/Dialog'
@@ -55,7 +53,7 @@ const defaultInputState = {
   terminal: 'T1'
 }
 
-interface IModalWindowProps {
+export interface IModalWindowProps {
   setMessage: (message: IMessage) => void
   flightInfo: IFlight | null
   open: boolean
@@ -101,12 +99,13 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
   }
 
   const addNewFlight = async () => {
-    const newState = {
-      ...inputState,
-      scheduledArrival: timeToISO(inputState.scheduledArrival.toString()),
-      scheduledDeparture: timeToISO(inputState.scheduledDeparture.toString())
-    }
     try {
+      const newState = {
+        ...inputState,
+        scheduledArrival: timeToISO(inputState.scheduledArrival.toString()),
+        scheduledDeparture: timeToISO(inputState.scheduledDeparture.toString())
+      }
+
       const newFlight = await apiCall('flights', 'POST', newState)
 
       setFlights((state) => {
@@ -209,6 +208,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
         Plan a new flight
       </Button>
       <Dialog
+        className={'dialogWindow'}
         open={open}
         keepMounted
         onClose={handleCancel}
@@ -222,9 +222,12 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
               <CircularProgress />
             </LoaderContainer>
           ) : (
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} data-testid="modal-window-form">
               <InputsWrapper>
                 <Input
+                  inputProps={{
+                    'data-testid': 'flightCode'
+                  }}
                   name="flightCode"
                   label="Flight Code"
                   variant="outlined"
@@ -238,6 +241,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                   required
                 />
                 <Input
+                  data-testid="flightProvider"
                   name="flightProvider"
                   label="Flight Provider"
                   variant="outlined"
@@ -253,6 +257,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                   required
                 />
                 <Input
+                  data-testid="sourcePortName"
                   name="sourcePortName"
                   label="Source Port Name"
                   variant="outlined"
@@ -268,6 +273,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                   required
                 />
                 <Input
+                  data-testid="sourcePortCode"
                   name="sourcePortCode"
                   label="Source Port Code"
                   variant="outlined"
@@ -283,6 +289,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                   required
                 />
                 <Input
+                  data-testid="destinationPortName"
                   name="destinationPortName"
                   label="Destination Port Name"
                   variant="outlined"
@@ -298,6 +305,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                   required
                 />
                 <Input
+                  data-testid="destinationPortCode"
                   name="destinationPortCode"
                   label="Destination Port Code"
                   variant="outlined"
@@ -328,12 +336,14 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                     shrink: true
                   }}
                   inputProps={{
-                    step: 300 // 5 min
+                    step: 300, // 5 min
+                    'data-testid': 'scheduledArrival'
                   }}
                   size={'small'}
                   fullWidth
                 />
                 <Input
+                  data-testid="scheduledDeparture"
                   name="scheduledDeparture"
                   label="Scheduled Departure"
                   variant="outlined"
@@ -357,6 +367,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                 <SelectWrapper variant="outlined" size={'small'} fullWidth>
                   <InputLabel id="select-status-label">Status</InputLabel>
                   <Select
+                    data-testid="status"
                     name="status"
                     labelId="select-status-label"
                     value={inputState.status}
@@ -378,6 +389,7 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
                 >
                   <InputLabel id="select-terminal-label">Terminal</InputLabel>
                   <Select
+                    data-testid="terminal"
                     name="terminal"
                     labelId="select-terminal-label"
                     value={
@@ -414,4 +426,9 @@ const ModalWindow: React.FC<IModalWindowProps> = ({
   )
 }
 
-export default ModalWindow
+const arePropsEqual = (
+  prevProps: IModalWindowProps,
+  nextProps: IModalWindowProps
+) => prevProps.open === nextProps.open
+
+export default memo(ModalWindow, arePropsEqual)
