@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   client:
-    build: ./packages/client
+    build: ./client
     container_name: tafd_client
     command: yarn start
     restart: unless-stopped
@@ -16,7 +16,7 @@ services:
       - tafd_network
 
   api:
-    build: ./packages/server
+    build: ./server
     container_name: tafd_server
     command: yarn start
     restart: unless-stopped
