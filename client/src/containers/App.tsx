@@ -1,15 +1,16 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, lazy, Suspense } from 'react'
 import theme from '../utils/styles/theme'
 import styled from 'styled-components'
 import MuiAlert from '@material-ui/lab/Alert'
 import Snackbar from '@material-ui/core/Snackbar'
 import { ThemeProvider } from '@material-ui/styles'
-import ModalWindow from './ModalWindow'
 import FlightDetailsContainer from './FlightDetails'
 import { IFlight } from '../interfaces/IFlight'
 import { IMessage, MessageType } from '../interfaces/IMessage'
 import { apiCall } from '../utils/api/backendApi'
 import CircularProgress from '@material-ui/core/CircularProgress'
+
+const ModalWindow = lazy(() => import('./ModalWindow'))
 
 const PlanFlightButtonContainer = styled.div`
   max-width: 1000px;
@@ -83,14 +84,16 @@ const App: React.FC = () => {
         />
       )}
       <PlanFlightButtonContainer>
-        <ModalWindow
-          setFlights={setFlights}
-          setMessage={setMessage}
-          flightInfo={flightInfo}
-          open={openModal}
-          handleClickOpen={() => handleClickOpen()}
-          handleClickClose={handleClickClose}
-        />
+        <Suspense fallback={<CircularProgress />}>
+          <ModalWindow
+            setFlights={setFlights}
+            setMessage={setMessage}
+            flightInfo={flightInfo}
+            open={openModal}
+            handleClickOpen={() => handleClickOpen()}
+            handleClickClose={handleClickClose}
+          />
+        </Suspense>
       </PlanFlightButtonContainer>
       <Snackbar
         open={!!message.text}
